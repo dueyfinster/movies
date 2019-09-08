@@ -64,7 +64,9 @@ def get_movie_ratings(movies):
         url = f'http://www.omdbapi.com/?t={mtitle}&type=movie&y={yr}&apikey={OMDB_API_KEY}'
         resp = get_json(url)
         if 'Error' not in resp:
+            m['genre'] = resp['Genre']
             m['ratings'] = resp['Ratings']
+            m['imdbID'] = resp['imdbID']
     return movies
 
 def main():
