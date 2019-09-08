@@ -2,30 +2,25 @@
 # A script to get latest movies, trailers and ratings
 import json
 from urllib import request
-import requests
+from urllib.parse import quote
+from pprint import pprint
 from datetime import datetime
-from bs4 import BeautifulSoup
 from os import path
 
 # Paths
 basepath = path.dirname(__file__)
-ledpath = path.abspath(path.join(basepath, "..", "hledger.journal"))
 
 URL="https://www.imccinemas.ie/Whats-On/Athlone"
 API_URL="https://www.imccinemas.ie/DesktopModules/Inventise.IMC.API/V1/API/Search/"
-
-def get_data(session, url):
-    result = session.get(url)
-    return BeautifulSoup(result.content,"html.parser")
-
-def post_data(session, url, data):
-    result = session.post(url, data=data)
-    return BeautifulSoup(result.content,"html.parser")
+IMG_URL="https://www.imccinemas.ie/Portals/0/EventImages/"
+LOC="Athlone"
+OMDB_API_KEY="f4a055f7"
 
 def get_json(url):
     with request.urlopen(url) as resp:
         data = json.loads(resp.read().decode())
         return data
+
 
 def post_json(body, url):
     jsondata = json.dumps(body)
@@ -37,22 +32,45 @@ def post_json(body, url):
     return resp
 
 
-def get_movies_on():
-    session_requests = requests.session()
-    soup = get_data(session_requests, URL)
-    print(soup)
-
 def get_movies_list():
     url = API_URL + "GetEventsByVenueDescription"
-    body = { "description": "Athlone" }
+    body = { "description": LOC }
     resp = post_json(body, url)
-    for i in resp['data']:
-        print(i)
+    nd = []
+    for m in resp['data']:
+        img_url = IMG_URL + m['Image']
+        nd.append({"id": m['UrlLink'], "title": m['Description'], "description": m['EventSummary'],"image": img_url, "release-date": m['ReleaseDate'], "director": m['Director'], "starring": m['Staring'], "duration": m['Duration'], "age-rating": m['RatingIE'], "trailer": m['Trailer'], "url": m['UrlLink']})
+    return nd
+
+
+def get_movie_times(movies):
+    url = API_URL + "GetEventDatesAndPerformances"
+    for m in movies:
+        body = { "eventDescription": m['id'], "eventDate": None, "venueDescription": LOC }
+        resp = post_json(body, url)['data']
+        evd = []
+        for ed in resp['EventDates']:
+            times = []
+            for st in ed['PerformanceDetails']:
+                times.append({"time": st['StartDate'], "screen": st['ScreenNumber']})
+            evd.append({"date": ed['EventDate'], "times": times})
+        m['showtimes'] = evd
+    return movies
+
+def get_movie_ratings(movies):
+    for m in movies:
+        mtitle = quote(m['title'])
+        yr = datetime.strptime(m['release-date'], "%Y-%m-%dT%H:%M:%S").year
+        url = f'http://www.omdbapi.com/?t={mtitle}&type=movie&y={yr}&apikey={OMDB_API_KEY}'
+        resp = get_json(url)
+        if 'Error' not in resp:
+            m['ratings'] = resp['Ratings']
+    return movies
 
 def main():
-    #get_movies_on()
-    get_movies_list()
-    d = []
+    movies = get_movies_list()
+    movies = get_movie_times(movies)
+    d = get_movie_ratings(movies)
     dpath = path.join(basepath, "data", "data.json")
     with open(dpath, 'w') as fp:
         json.dump(d, fp)
