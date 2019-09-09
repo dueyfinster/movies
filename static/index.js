@@ -1,4 +1,4 @@
-function create_card(id, title) {
+function create_card(id, title, img_src) {
     const div = document.createElement('div');
     div.setAttribute("class", 'card');
     div.setAttribute("id", 'card' + id);
@@ -14,6 +14,10 @@ function create_card(id, title) {
     main.setAttribute("class", 'card__main');
     main.setAttribute("id", 'card__main' + id);
 
+    const img = document.createElement('img');
+    img.src = img_src;
+    main.appendChild(img);
+
     div.appendChild(header);
     div.appendChild(main);
 
@@ -28,7 +32,7 @@ window.onload = function () {
         .then(data => {
             let id = 0;
             for (let s of data) {
-                create_card(s['id'], s['title']);
+                create_card(s['id'], s['title'], s['image']);
             }
         });
 };
