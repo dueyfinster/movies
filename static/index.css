@@ -32,68 +32,17 @@ header {
   margin: 20px;
 }
 
-.overviewCard {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px;
-  background-color: #FFF;
-  transform: translateY(0);
-  transition: all .3s;
-}
-
-.overviewCard-icon--savings {
-  /*background-color: #e67e22;*/
-  background-color: #af64cc;
-}
-.overviewCard-icon--current {
-  background-color: #27ae60;
-}
-
-.overviewCard-icon--car {
-  background-color: #e74c3c;
-}
-
-.overviewCard-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-  width: 60px;
-  border-radius: 50%;
-  font-size: 21px;
-  color: #fff;
-}
-
-.overviewCard-description {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.overviewCard-title {
-  font-size: 18px;
-  color: #1BBAE1;
-  margin: 0;
-}
-
-.overviewCard-subtitle {
-  margin: 2px;
-  color: #777;
-}
-
 .card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  -webkit-column-break-inside: avoid;
-  box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas: "header header" 
+                          "left right";
+    background-color: #EAEDF1;
+    grid-gap: 1em;
 }
 
 .card__header {
-  display: flex;
-  width: 100%;
+  grid-area: header;
   align-items: center;
   justify-content: space-between;
   height: 50px;
@@ -101,12 +50,12 @@ header {
   color: #FFF;
 }
 
-.card__main {
-    width: 100%;
-    height: 100%;
-    font-size: 11px;
-    min-width: 0;
-    background-color: #FFF;
+.card__left {
+    grid-area: left;
+}
+
+.card__right {
+    grid-area: right;
 }
 
 .legend{
